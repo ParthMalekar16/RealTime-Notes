@@ -25,12 +25,15 @@ export const metadata: Metadata = {
 // 4. THE ONLY RootLayout Function Allowed
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${dmMono.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${dmSans.variable} ${dmMono.variable} h-full w-full m-0 p-0`}
+    >
+      <body className="h-full w-full m-0 p-0 antialiased">{children}</body>
     </html>
   );
 }
