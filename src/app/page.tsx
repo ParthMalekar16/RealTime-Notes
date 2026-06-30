@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, type MouseEvent } from "react";
 
 type Note = {
@@ -11,12 +10,10 @@ type Note = {
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  // 1. Initialize notes as a clean empty array for safe Server-Side Rendering
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // 2. Hydrate data from localStorage ONLY once mounted on the client browser
   useEffect(() => {
     const savedNotes = localStorage.getItem("collabnotes_data");
     if (savedNotes) {
@@ -29,8 +26,8 @@ export default function Home() {
       const defaultNotes: Note[] = [
         {
           id: 1,
-          title: "Welcome to Collabnotes 🚀",
-          content: "This is your first note! Type your thoughts here.",
+          title: "Welcome to CollabNotes",
+          content: "Start writing your ideas!",
           pinned: false,
         },
       ];
@@ -39,17 +36,14 @@ export default function Home() {
     }
   }, []);
 
-  // 3. Keep syncing state updates back into local storage safely
   useEffect(() => {
     if (notes.length > 0) {
       localStorage.setItem("collabnotes_data", JSON.stringify(notes));
     }
   }, [notes]);
 
-  // Find the active note safely (guarding against empty array states)
   const activeNote = notes.find((note) => note.id === activeNoteId) || notes[0];
 
-  // Action Handlers
   const handleAddNote = () => {
     const newNote: Note = {
       id: Date.now(),
@@ -102,7 +96,6 @@ export default function Home() {
 
   return (
     <main className="h-screen w-screen max-w-full flex m-0 p-0 overflow-hidden bg-brand-secondary">
-      {/* SIDEBAR PANEL */}
       <aside className={`p-4 border-r-2 border-brand-border bg-brand-primary flex flex-col transition-all duration-300 ease-in-out overflow-hidden ${sidebarOpen ? "w-80 opacity-100 pointer-events-auto" : "w-0 p-0 opacity-0 border-r-0 pointer-events-none"}`}>
         <div className="w-72 overflow-hidden"> 
           <div className="flex items-center justify-between">
@@ -117,6 +110,9 @@ export default function Home() {
               </svg>
             </div>
             <input 
+            value = {searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            
               type="text" 
               placeholder="Search notes..." 
               className="w-full pl-9 pr-4 py-2 rounded-lg border border-brand-border bg-brand-secondary text-sm font-sans focus:outline-none focus:border-gray-400 transition-colors"
@@ -125,6 +121,9 @@ export default function Home() {
 
           <div className="mt-6 space-y-3">
             {[...notes]
+            .filter((note) => 
+              note.title.toLowerCase().includes(searchQuery.toLowerCase())
+          )
               .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
               .map((note) => (
                 <div 
@@ -136,7 +135,6 @@ export default function Home() {
                       : "border-brand-border bg-brand-secondary hover:border-gray-300"
                   }`}
                 >
-                  {/* Action Icons */}
                   <div className="absolute top-2.5 right-2.5 flex gap-2 text-xs">
                     <button 
                       onClick={(e) => handleTogglePinNote(note.id, e)} 
@@ -154,12 +152,10 @@ export default function Home() {
                     </button>
                   </div>
 
-                  {/* Dynamic Title */}
                   <h3 className="text-sm font-semibold text-gray-900 pr-12 truncate">
                     {note.title || "Untitled Note"}
                   </h3>
 
-                  {/* Dynamic Content Preview */}
                   <p className="mt-1 text-xs text-gray-500/80 leading-relaxed line-clamp-2">
                     {note.content || "No additional text..."}
                   </p>
@@ -169,7 +165,6 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* RIGHT WORKSPACE WORKAREA */}
       <div className="flex-1 flex flex-col h-full min-w-0 w-full">
         <header className="h-16 p-4 border-b-2 border-brand-border bg-brand-primary flex items-center w-full gap-4 relative z-10">
           <button 
